@@ -58,14 +58,13 @@ object LeaderboardGameSDK {
      */
     suspend fun registerPlayer(username: String, avatarUrl: String? = null): Player {
         checkInitialized()
-        val response = api.registerPlayer(
-            apiKey,
-            mapOf(
-                "device_id" to DeviceManager.getDeviceId(),
-                "username" to username,
-                "avatar_url" to avatarUrl
-            )
+        val body = mutableMapOf<String, Any>(
+            "device_id" to DeviceManager.getDeviceId(),
+            "username" to username
         )
+        avatarUrl?.let { body["avatar_url"] = it }
+
+        val response = api.registerPlayer(apiKey, body)
         currentPlayer = response.player
         return response.player
     }
@@ -125,14 +124,14 @@ object LeaderboardGameSDK {
         }
 
         // Register user account
-        val authResponse = api.registerUser(
-            mapOf(
-                "email" to email,
-                "password" to password,
-                "username" to username,
-                "avatar_url" to avatarUrl
-            )
+        val userBody = mutableMapOf(
+            "email" to email,
+            "password" to password,
+            "username" to username
         )
+        avatarUrl?.let { userBody["avatar_url"] = it }
+
+        val authResponse = api.registerUser(userBody)
 
         // Save token
         TokenManager.saveToken(authResponse.token)
@@ -250,15 +249,15 @@ object LeaderboardGameSDK {
     ): Score {
         checkInitialized()
         val player = currentPlayer ?: throw IllegalStateException("No current player. Call registerPlayer or restorePlayer first.")
-        val response = api.submitScore(
-            apiKey,
-            mapOf(
-                "leaderboard_id" to leaderboardId,
-                "player_id" to player._id,
-                "score" to score,
-                "metadata" to metadata
-            )
+
+        val body = mutableMapOf<String, Any>(
+            "leaderboard_id" to leaderboardId,
+            "player_id" to player._id,
+            "score" to score
         )
+        metadata?.let { body["metadata"] = it }
+
+        val response = api.submitScore(apiKey, body)
         return response.score
     }
 

@@ -7,7 +7,7 @@ internal interface GameApi {
     // Auth endpoints
     @POST("users/register")
     suspend fun registerUser(
-        @Body body: Map<String, String?>
+        @Body body: Map<String, String>
     ): AuthResponse
 
     @POST("users/login")
@@ -25,7 +25,7 @@ internal interface GameApi {
     @POST("players")
     suspend fun registerPlayer(
         @Header("X-API-Key") apiKey: String,
-        @Body body: Map<String, Any?>
+        @Body body: Map<String, Any>
     ): PlayerResponse
 
     @GET("players/by-device/{deviceId}")
@@ -55,7 +55,7 @@ internal interface GameApi {
     @POST("scores")
     suspend fun submitScore(
         @Header("X-API-Key") apiKey: String,
-        @Body body: Map<String, Any?>
+        @Body body: Map<String, Any>
     ): ScoreResponse
 
     @GET("scores/{leaderboardId}")
