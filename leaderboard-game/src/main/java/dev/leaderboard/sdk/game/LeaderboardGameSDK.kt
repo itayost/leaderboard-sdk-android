@@ -91,7 +91,12 @@ object LeaderboardGameSDK {
     suspend fun linkToUser(userToken: String): Player {
         checkInitialized()
         val player = currentPlayer ?: throw IllegalStateException("No current player. Call registerPlayer or restorePlayer first.")
-        val response = api.linkPlayer(apiKey, player._id, "$BEARER_PREFIX$userToken")
+        val response = api.linkPlayer(
+            apiKey,
+            player._id,
+            "$BEARER_PREFIX$userToken",
+            mapOf("device_id" to DeviceManager.getDeviceId())
+        )
         currentPlayer = response.player
         return response.player
     }

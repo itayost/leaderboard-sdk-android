@@ -38,7 +38,8 @@ internal interface GameApi {
     suspend fun linkPlayer(
         @Header("X-API-Key") apiKey: String,
         @Path("playerId") playerId: String,
-        @Header("Authorization") userToken: String
+        @Header("Authorization") userToken: String,
+        @Body body: Map<String, String>
     ): PlayerResponse
 
     @POST("leaderboards")
