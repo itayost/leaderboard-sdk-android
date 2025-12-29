@@ -1,0 +1,16 @@
+title: Leaderboard SDK for Android
+description: A multi-module Kotlin SDK for game leaderboards
+theme: jekyll-theme-cayman
+baseurl: "/leaderboard-sdk-android"
+url: "https://itayost.github.io"
+
+# Navigation
+nav:
+  - title: Home
+    url: /
+  - title: Game SDK
+    url: /game-sdk
+  - title: Hub SDK
+    url: /hub-sdk
+  - title: API Reference
+    url: /api-reference
