@@ -242,16 +242,18 @@ object LeaderboardGameSDK {
 
     /**
      * Submit a score for the current player.
+     * Returns the submitted score AND any trophies earned from this score.
      *
      * @param leaderboardId The leaderboard to submit to
      * @param score The score value
      * @param metadata Optional additional data
+     * @return Response with score and any trophies earned
      */
     suspend fun submitScore(
         leaderboardId: String,
         score: Long,
         metadata: Map<String, Any>? = null
-    ): Score {
+    ): ScoreWithTrophiesResponse {
         checkInitialized()
         val player = currentPlayer ?: throw IllegalStateException("No current player. Call registerPlayer or restorePlayer first.")
 
@@ -262,8 +264,7 @@ object LeaderboardGameSDK {
         )
         metadata?.let { body["metadata"] = it }
 
-        val response = api.submitScore(apiKey, body)
-        return response.score
+        return api.submitScore(apiKey, body)
     }
 
     /**
@@ -287,6 +288,78 @@ object LeaderboardGameSDK {
         checkInitialized()
         val player = currentPlayer ?: throw IllegalStateException("No current player. Call registerPlayer or restorePlayer first.")
         return api.getPlayerRank(apiKey, leaderboardId, player._id, nearby)
+    }
+
+    // ==================== Trophy System ====================
+
+    /**
+     * Get all available trophies for this game.
+     */
+    suspend fun getAvailableTrophies(): TrophiesResponse {
+        checkInitialized()
+        return api.getAllTrophies(apiKey)
+    }
+
+    /**
+     * Get the current player's trophies with progress.
+     *
+     * @param status Filter by status: "earned", "in_progress", or null for all
+     */
+    suspend fun getPlayerTrophies(status: String? = null): PlayerTrophiesResponse {
+        checkInitialized()
+        val player = currentPlayer
+            ?: throw IllegalStateException("No current player. Call registerPlayer or restorePlayer first.")
+        return api.getPlayerTrophies(apiKey, player._id, status)
+    }
+
+    /**
+     * Get trophies the player has earned.
+     */
+    suspend fun getEarnedTrophies(): PlayerTrophiesResponse {
+        return getPlayerTrophies("earned")
+    }
+
+    /**
+     * Get trophies the player is making progress on.
+     */
+    suspend fun getTrophiesInProgress(): PlayerTrophiesResponse {
+        return getPlayerTrophies("in_progress")
+    }
+
+    /**
+     * Manually trigger a trophy event (for custom trophies).
+     *
+     * @param eventKey The event key defined in the trophy trigger
+     * @param customData Optional additional data about the event
+     * @return Response with newly earned trophies and updated progress
+     */
+    suspend fun triggerTrophyEvent(
+        eventKey: String,
+        customData: Map<String, Any>? = null
+    ): TrophyTriggerResponse {
+        checkInitialized()
+        val player = currentPlayer
+            ?: throw IllegalStateException("No current player. Call registerPlayer or restorePlayer first.")
+
+        val body = mutableMapOf<String, Any>(
+            "player_id" to player._id,
+            "event_key" to eventKey
+        )
+        customData?.let { body["custom_data"] = it }
+
+        return api.triggerTrophy(apiKey, body)
+    }
+
+    /**
+     * Get progress for a specific trophy.
+     *
+     * @param trophyId The trophy ID
+     */
+    suspend fun getTrophyProgress(trophyId: String): TrophyProgressResponse {
+        checkInitialized()
+        val player = currentPlayer
+            ?: throw IllegalStateException("No current player. Call registerPlayer or restorePlayer first.")
+        return api.getTrophyProgress(apiKey, trophyId, player._id)
     }
 
     private fun checkInitialized() {

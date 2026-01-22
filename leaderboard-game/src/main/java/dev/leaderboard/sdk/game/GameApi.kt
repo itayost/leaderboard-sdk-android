@@ -57,7 +57,7 @@ internal interface GameApi {
     suspend fun submitScore(
         @Header("X-API-Key") apiKey: String,
         @Body body: @JvmSuppressWildcards Map<String, Any>
-    ): ScoreResponse
+    ): ScoreWithTrophiesResponse
 
     @GET("scores/{leaderboardId}")
     suspend fun getTopScores(
@@ -73,4 +73,31 @@ internal interface GameApi {
         @Path("playerId") playerId: String,
         @Query("nearby") nearby: Int
     ): PlayerRankResponse
+
+    // ==================== Trophy Endpoints ====================
+
+    @GET("trophies")
+    suspend fun getAllTrophies(
+        @Header("X-API-Key") apiKey: String
+    ): TrophiesResponse
+
+    @GET("trophies/player/{playerId}")
+    suspend fun getPlayerTrophies(
+        @Header("X-API-Key") apiKey: String,
+        @Path("playerId") playerId: String,
+        @Query("status") status: String?
+    ): PlayerTrophiesResponse
+
+    @POST("trophies/trigger")
+    suspend fun triggerTrophy(
+        @Header("X-API-Key") apiKey: String,
+        @Body body: @JvmSuppressWildcards Map<String, Any>
+    ): TrophyTriggerResponse
+
+    @GET("trophies/{trophyId}/player/{playerId}/progress")
+    suspend fun getTrophyProgress(
+        @Header("X-API-Key") apiKey: String,
+        @Path("trophyId") trophyId: String,
+        @Path("playerId") playerId: String
+    ): TrophyProgressResponse
 }

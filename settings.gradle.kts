@@ -29,3 +29,4 @@ include(":leaderboard-hub")
 // Sample Apps
 include(":sample-game")
 include(":sample-hub")
+include(":sample-dev-hub")
