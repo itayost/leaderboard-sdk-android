@@ -92,8 +92,8 @@ Initialize the SDK once in your Application class or main Activity:
 ```kotlin
 LeaderboardGameSDK.init(
     context = applicationContext,
-    apiKey = "your-api-key",
-    baseUrl = "https://your-api.vercel.app/"  // Optional
+    apiKey = "your-api-key",  // Get from /apps endpoint
+    baseUrl = "https://leaderboard-api-alpha.vercel.app/"
 )
 ```
 
@@ -285,7 +285,7 @@ lifecycleScope.launch {
 ```kotlin
 LeaderboardHubSDK.init(
     context = applicationContext,
-    baseUrl = "https://your-api.vercel.app/"  // Optional
+    baseUrl = "https://leaderboard-api-alpha.vercel.app/"
 )
 ```
 
