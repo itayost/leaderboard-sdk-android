@@ -14,7 +14,7 @@ This SDK consists of two separate modules:
 ```
 ┌─────────────────┐     ┌─────────────────┐
 │   Game SDK      │     │    Hub SDK      │
-│ (for games)     │     │ (for hub app)   │
+│ (for games)     │     │ (for devs)      │
 └────────┬────────┘     └────────┬────────┘
          │                       │
          └───────────┬───────────┘
@@ -25,18 +25,18 @@ This SDK consists of two separate modules:
 ```
 
 ### Game SDK (`leaderboard-game`)
-For game developers to integrate into their games:
-- Anonymous players (device-based, no account required)
-- Optional user registration/login (email/password)
-- Auto sign-in for returning registered users
-- Score submission, leaderboards, rankings
-- Link anonymous scores to user account
+For integrating leaderboards into games:
+- Anonymous players (device-based, no login required)
+- Score submission and retrieval
+- Leaderboard rankings
+- Simple API - just a few lines of code
 
 ### Hub SDK (`leaderboard-hub`)
-For the Game Hub app where users can:
-- See all scores across ALL games they've played
-- User registration/login with JWT
-- Cross-game stats and score aggregation
+For developers to manage their apps and view analytics:
+- User authentication (email/password)
+- View all registered apps and their statistics
+- Player management and analytics
+- Cross-game score aggregation
 
 ## Demo Apps
 
@@ -44,8 +44,8 @@ See the SDK in action with these demo applications:
 
 | Demo | SDK Used | Description |
 |------|----------|-------------|
-| [Flappy Bird](https://github.com/itayost/leaderboard-flappy-bird) | Game SDK | Classic game with leaderboard integration |
-| [Developer Hub](https://github.com/itayost/leaderboard-developer-hub) | Hub SDK | Cross-game statistics dashboard |
+| [Flappy Bird](https://github.com/itayost/leaderboard-flappy-bird) | Game SDK | Classic game demonstrating leaderboard integration |
+| [Developer Hub](https://github.com/itayost/leaderboard-developer-hub) | Hub SDK | Developer portal for managing apps and viewing analytics |
 
 Both demos are ready to clone and run - see their READMEs for setup instructions.
 
@@ -85,195 +85,48 @@ dependencies {
 
 ## Game SDK Usage
 
-### Initialize the SDK
-
-Initialize the SDK once in your Application class or main Activity:
+### 1. Initialize
 
 ```kotlin
 LeaderboardGameSDK.init(
     context = applicationContext,
-    apiKey = "your-api-key",  // Get from /apps endpoint
+    apiKey = "your-api-key",  // Get from Developer Hub
     baseUrl = "https://leaderboard-api-alpha.vercel.app/"
 )
 ```
 
-### Auto Sign-in (Returning Users)
+### 2. Register Player
 
-For users who previously registered, automatically restore their session:
-
-```kotlin
-lifecycleScope.launch {
-    val player = LeaderboardGameSDK.tryAutoRestore()
-    if (player != null) {
-        // User is signed in, player restored
-        Log.d("SDK", "Welcome back, ${player.username}!")
-    } else {
-        // No saved session, user can play anonymously or register
-    }
-}
-```
-
-### Anonymous Player (No Account Required)
-
-Create an anonymous player linked to the device:
+Create an anonymous player (no login required):
 
 ```kotlin
 lifecycleScope.launch {
-    try {
-        val player = LeaderboardGameSDK.registerPlayer("PlayerName")
-        Log.d("SDK", "Player created: ${player.username}")
-    } catch (e: HttpException) {
-        Log.e("SDK", "HTTP error: ${e.code()}")
-    } catch (e: IOException) {
-        Log.e("SDK", "Network error: ${e.message}")
-    }
+    val player = LeaderboardGameSDK.registerPlayer("PlayerName")
+    // Player is now ready to submit scores
 }
 ```
 
-### Restore Existing Anonymous Player
-
-Restore a player by device ID:
+### 3. Submit a Score
 
 ```kotlin
 lifecycleScope.launch {
-    try {
-        val player = LeaderboardGameSDK.restorePlayer()
-        Log.d("SDK", "Player restored: ${player.username}")
-    } catch (e: HttpException) {
-        if (e.code() == 404) {
-            // No existing player, create one
-        }
-    }
+    val score = LeaderboardGameSDK.submitScore(
+        leaderboardId = "leaderboard-id",
+        score = 1500L
+    )
 }
 ```
 
-### User Registration (Optional)
-
-Players can optionally register with email/password. This links their anonymous player to a user account, preserving all scores:
+### 4. Get Leaderboard
 
 ```kotlin
 lifecycleScope.launch {
-    try {
-        val authResponse = LeaderboardGameSDK.register(
-            email = "player@example.com",
-            password = "securepassword",
-            username = "PlayerName"
-        )
-        Log.d("SDK", "Registered: ${authResponse.user.email}")
-        // Player is now linked to user account
-        // On next app launch, tryAutoRestore() will sign them in automatically
-    } catch (e: HttpException) {
-        Log.e("SDK", "Registration failed: ${e.code()}")
-    }
-}
-```
-
-### User Login
-
-Sign in with existing account:
-
-```kotlin
-lifecycleScope.launch {
-    try {
-        val authResponse = LeaderboardGameSDK.login(
-            email = "player@example.com",
-            password = "securepassword"
-        )
-        Log.d("SDK", "Logged in: ${authResponse.user.email}")
-
-        val player = LeaderboardGameSDK.getCurrentPlayer()
-        if (player != null) {
-            Log.d("SDK", "Player: ${player.username}")
-        }
-    } catch (e: HttpException) {
-        Log.e("SDK", "Login failed: ${e.code()}")
-    }
-}
-```
-
-### Logout
-
-```kotlin
-LeaderboardGameSDK.logout()
-// Token cleared, user can play anonymously again
-```
-
-### Check Auth Status
-
-```kotlin
-if (LeaderboardGameSDK.isLoggedIn()) {
-    val user = LeaderboardGameSDK.getCurrentUser()
-    val player = LeaderboardGameSDK.getCurrentPlayer()
-    Log.d("SDK", "Logged in as ${user?.email}, player: ${player?.username}")
-}
-```
-
-### Submit a Score
-
-```kotlin
-lifecycleScope.launch {
-    try {
-        val score = LeaderboardGameSDK.submitScore(
-            leaderboardId = "leaderboard-id",
-            score = 1500L,
-            metadata = mapOf("level" to 5)  // Optional
-        )
-        Log.d("SDK", "Score submitted: ${score.score}")
-    } catch (e: HttpException) {
-        Log.e("SDK", "Error: ${e.code()}")
-    } catch (e: IllegalStateException) {
-        Log.e("SDK", "No player: ${e.message}")
-    }
-}
-```
-
-### Get Top Scores
-
-```kotlin
-lifecycleScope.launch {
-    try {
-        val response = LeaderboardGameSDK.getTopScores(
-            leaderboardId = "leaderboard-id",
-            limit = 10
-        )
-        response.scores.forEach { entry ->
-            Log.d("SDK", "#${entry.rank} ${entry.player.username}: ${entry.score.score}")
-        }
-    } catch (e: HttpException) {
-        Log.e("SDK", "Error: ${e.code()}")
-    }
-}
-```
-
-### Get Player Rank
-
-```kotlin
-lifecycleScope.launch {
-    try {
-        val response = LeaderboardGameSDK.getPlayerRank(
-            leaderboardId = "leaderboard-id",
-            nearby = 5
-        )
-        Log.d("SDK", "Rank: #${response.rank} of ${response.total_players}")
-        Log.d("SDK", "Best Score: ${response.best_score.score}")
-    } catch (e: HttpException) {
-        Log.e("SDK", "Error: ${e.code()}")
-    }
-}
-```
-
-### Create a Leaderboard
-
-```kotlin
-lifecycleScope.launch {
-    try {
-        val leaderboard = LeaderboardGameSDK.createLeaderboard(
-            name = "Daily High Scores",
-            sortOrder = "desc"  // "desc" = highest first, "asc" = lowest first
-        )
-        Log.d("SDK", "Created: ${leaderboard._id}")
-    } catch (e: HttpException) {
-        Log.e("SDK", "Error: ${e.code()}")
+    val response = LeaderboardGameSDK.getTopScores(
+        leaderboardId = "leaderboard-id",
+        limit = 10
+    )
+    response.scores.forEach { entry ->
+        Log.d("SDK", "#${entry.rank} ${entry.player.username}: ${entry.score.score}")
     }
 }
 ```
@@ -289,33 +142,35 @@ LeaderboardHubSDK.init(
 )
 ```
 
-### Register / Login
+### Developer Authentication
 
 ```kotlin
 lifecycleScope.launch {
     try {
-        val authResponse = LeaderboardHubSDK.register(
-            email = "user@example.com",
-            password = "securepassword",
-            username = "Username"
+        // Login as developer
+        val authResponse = LeaderboardHubSDK.login(
+            email = "developer@example.com",
+            password = "securepassword"
         )
-        Log.d("SDK", "Registered: ${authResponse.user.email}")
+        Log.d("SDK", "Logged in: ${authResponse.user.email}")
     } catch (e: HttpException) {
         Log.e("SDK", "Error: ${e.code()}")
     }
 }
 ```
 
-### Get All Games & Scores
+### View Apps & Analytics
 
 ```kotlin
 lifecycleScope.launch {
     try {
+        // Get all apps registered by this developer
         val gamesResponse = LeaderboardHubSDK.getMyGames()
         gamesResponse.games.forEach { game ->
-            Log.d("SDK", "Game: ${game.app.name}, Scores: ${game.total_scores}")
+            Log.d("SDK", "App: ${game.app.name}, Total Scores: ${game.total_scores}")
         }
 
+        // Get score data across all apps
         val scoresResponse = LeaderboardHubSDK.getMyScores(limit = 50)
         scoresResponse.scores.forEach { entry ->
             Log.d("SDK", "Score: ${entry.score.score} in ${entry.app?.name}")
