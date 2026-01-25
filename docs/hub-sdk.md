@@ -5,14 +5,14 @@ title: Hub SDK Guide
 
 # Hub SDK Guide
 
-The Hub SDK is designed for building a Game Hub app where users can see all their scores across all games.
+The Hub SDK is designed for building a Developer Portal app where developers can manage their apps and view analytics.
 
 ## Features
 
-- User registration/login with JWT
-- Cross-game stats and score aggregation
-- Encrypted token storage
-- Auto sign-in for returning users
+- Developer authentication with JWT
+- View all registered apps and statistics
+- Player analytics and score data
+- Cross-game statistics dashboard
 
 ## Installation
 
@@ -31,7 +31,7 @@ class MyApplication : Application() {
 }
 ```
 
-## User Authentication
+## Developer Authentication
 
 ### Register
 
@@ -97,7 +97,7 @@ if (LeaderboardHubSDK.isLoggedIn()) {
 }
 ```
 
-## User Profile
+## Developer Profile
 
 ### Get Profile
 
@@ -128,11 +128,11 @@ lifecycleScope.launch {
 }
 ```
 
-## Cross-Game Stats
+## App Analytics
 
-### Get All Games
+### Get All Apps
 
-Get all games the user has played:
+Get all apps registered by the developer:
 
 ```kotlin
 lifecycleScope.launch {
@@ -151,7 +151,7 @@ lifecycleScope.launch {
 
 ### Get All Scores
 
-Get all scores across all games:
+Get score data across all apps:
 
 ```kotlin
 lifecycleScope.launch {
@@ -191,7 +191,7 @@ lifecycleScope.launch {
 
 ## Demo App
 
-See [leaderboard-developer-hub](https://github.com/itayost/leaderboard-developer-hub) for a complete hub app implementation using the Hub SDK.
+See [leaderboard-developer-hub](https://github.com/itayost/leaderboard-developer-hub) for a complete developer portal implementation using the Hub SDK.
 
 ## Full API Reference
 

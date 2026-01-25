@@ -11,18 +11,15 @@ A multi-module Kotlin SDK for integrating leaderboard functionality into Android
 
 ## Features
 
-- **Two SDKs** for different use cases
-- **Anonymous players** - No account required
-- **User accounts** - Optional registration with auto sign-in
-- **Real-time leaderboards** - Submit scores, get rankings
-- **Cross-game stats** - Hub app shows all games
+- **Game SDK** - For games: anonymous players, score submission, leaderboards
+- **Hub SDK** - For developers: manage apps, view analytics, cross-game stats
 
 ## Architecture
 
 ```
 ┌─────────────────┐     ┌─────────────────┐
 │   Game SDK      │     │    Hub SDK      │
-│ (for games)     │     │ (for hub app)   │
+│ (for games)     │     │ (for devs)      │
 └────────┬────────┘     └────────┬────────┘
          │                       │
          └───────────┬───────────┘
@@ -82,14 +79,14 @@ lifecycleScope.launch {
 
 ## Documentation
 
-- [Game SDK Guide](game-sdk.md) - For game developers
-- [Hub SDK Guide](hub-sdk.md) - For hub app development
+- [Game SDK Guide](game-sdk.md) - For integrating leaderboards into games
+- [Hub SDK Guide](hub-sdk.md) - For developer portal apps
 - [API Reference](api-reference.md) - Full API documentation
 
 ## Demo Apps
 
-- [leaderboard-flappy-bird](https://github.com/itayost/leaderboard-flappy-bird) - Complete game example using the Game SDK
-- [leaderboard-developer-hub](https://github.com/itayost/leaderboard-developer-hub) - Hub app example using the Hub SDK
+- [leaderboard-flappy-bird](https://github.com/itayost/leaderboard-flappy-bird) - Game example using the Game SDK
+- [leaderboard-developer-hub](https://github.com/itayost/leaderboard-developer-hub) - Developer portal using the Hub SDK
 
 ## Requirements
 
